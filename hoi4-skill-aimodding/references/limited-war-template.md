@@ -402,4 +402,4 @@ TAG_peace_out = {
 5. **`lw_states` 存的是 state scope**，但 `on_state_control_changed` 里比较的是 `FROM.FROM`（州 ID）；靠引擎的 scope→id 转换对上，不要改成直接存 ID。
 6. **快照必须只收录「目标当前控制」的州**，否则战后可能把第三方或自己的州割过来。
 7. **事件里的 `for_each_scope_loop` 默认 scope 是 state**，`owner = { }` / `controller = { }` 才能进到国家作用域。
-8. **验收**：改完跑 `scripts/check_brackets.py`（括号/引号/BOM），再进游戏用控制台 `decision` 面板确认条目数量 = 候选国数量、点一次后 `previous_lw_targets` 增加、365 天后能正常谈和。
+8. **验收**：改完跑 `scripts/check_brackets.py`（括号/引号/BOM），再进游戏确认：决策条目数 = 候选国数；点一次后该国条目消失（已不在候选名单）；365 天或投降度达标后能正常谈和割州；默认配置下**谈和之后还能对同一国家再次开战**（若启用「一国一次」则不应再出现条目）。
