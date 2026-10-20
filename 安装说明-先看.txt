@@ -1,4 +1,4 @@
-﻿HOI4 模组开发助手 skill · v2.31
+﻿HOI4 模组开发助手 skill · v2.41
 制作者：猫妖
 =============================================
 
@@ -46,6 +46,7 @@ references/               按任务查阅的参考文档（渐进披露，不要
   landmarks-3d.md                 3D 地标工具链
   version-adapt.md                版本适配
   ra-notes.md                     项目经验示例（可换成你自己的）
+  limited-war-template.md          有限战争通用模板（动态目标决策/任务/事件链）
   grand-doctrine-tutorial-主学说教程.txt  主学说教程
   sub-doctrine-tutorial-子学说教程.md     子学说教程
   unit-categories-参考.txt        单位类别白名单参考

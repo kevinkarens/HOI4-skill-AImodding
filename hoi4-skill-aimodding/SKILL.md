@@ -1,6 +1,6 @@
 ---
 name: hoi4-skill-aimodding
-version: 2.31
+version: 2.41
 description: 钢铁雄心4(HOI4)模组开发指南与新手引导 — 从「我要制作一个钢铁雄心4的XX mod」一句话开始，引导完成 mod 骨架搭建、新国家/新国策树/新单位/新事件等全部内容制作、地图与州数据（挪省/州重排/海洋州/地形/胜利点）、本地化、崩溃排查。当用户想制作或修改任何 HOI4 mod、编辑 .txt/.gfx/.yml/.mesh 文件、挪省改州、加胜利点或州名、改地形、排查闪退时使用。
 author: 猫妖
 user-invocable: true
@@ -28,6 +28,7 @@ HOI4（Hearts of Iron IV）使用 Paradox Interactive 专有脚本语言（形�
 - **⭐ 建筑高程修复 / 防穿模**：heightmap 改动后建筑悬空、陷地、被山体穿模的整套诊断与落地工具（绿豆糕模块）。
 - **⭐ 全图改造流水线**：多州省均分（紧凑度优化）、海洋州批量创建、州名本地化体系、胜利点管理、地形三步覆盖，全部实战验证过的成套流程。
 - **⭐ 闪退定位**：读 `logs/error.log` 尾部定位崩溃原因，给出修复清单与回退方案。
+- **⭐ 有限战争模板**：动态目标决策（`target_array` 一国一条）+ 战争范围快照 + 任务三出口 + 事件链谈和，一套骨架可复制到任意国家的殖民地/边境冲突。
 
 ## 首次使用（每个环境只做一次）
 
@@ -39,7 +40,7 @@ HOI4（Hearts of Iron IV）使用 Paradox Interactive 专有脚本语言（形�
 ```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   HOI4 模组开发助手 · 首次使用向导
-  制作者：猫妖    版本：v2.31
+  制作者：猫妖    版本：v2.41
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   💡 想达到最佳效果，推荐先安装两个配套项目：
      · superpowers-zh（技能框架）
@@ -130,6 +131,7 @@ HOI4（Hearts of Iron IV）使用 Paradox Interactive 专有脚本语言（形�
 | **挪省(province)属州、改州归属、进游戏闪退** | `references/map-data.md` —— 省→州映射散在 state 文件与 `map/buildings.txt` 两处，改一处必同步另一处；含改完必过的"语法关"清单 |
 | **建筑悬空/陷地/被山体穿模**（heightmap 改动后尤甚） | `references/buildings-height.md` —— 第 4 列 y 重算 + 防穿模抬升，配 `scripts/` 三个工具。**本模块由绿豆糕制作** |
 | **批量挪省/均分州/海州/州名/VP/地形/补号**（Gamma 全图改造流水线） | `references/gamma-pipeline.md` —— 多州均分紧凑度优化、海洋州创建、州名 `*` 化、VP 管理、地形三步覆盖、合并修复与**简单迁移补号**（含「禁全量迁移」铁律） |
+| **有限战争 / 定向征伐（动态目标决策 + 任务结算）** | `references/limited-war-template.md` —— target_array 动态决策、战区快照、任务三出口、事件链谈和，含可直接套用的骨架与参数表 |
 | 适配基础游戏新版本（stale override） | `references/version-adapt.md` |
 | **本项目专属经验示例**（决议/科技树/占领…） | `references/ra-notes.md` —— 特定 mod 的经验库，**先按索引 Grep 关键词，不要整读**；可替换为你自己项目的积累 |
 
@@ -209,6 +211,7 @@ hoi4/
     gamma-pipeline.md         # Gamma 全图改造流水线（均分/海州/州名/VP/地形）
     unit-categories-参考.txt  # 单位类别白名单全注释参考（只查不放进 mod）
     version-adapt.md          # 基础游戏版本适配
+    limited-war-template.md   # 有限战争通用模板（动态目标决策/任务快照/事件链）
     ra-notes.md               # 项目专属经验库（示例，可换成你自己的）
   scripts/
     fix_buildings_height.py   # 建筑高程诊断
@@ -237,6 +240,6 @@ hoi4/
 
 ## 开源说明
 
-- 本 skill 名为 **hoi4-skill-aimodding**，由**猫妖**制作，当前版本 **v2.31**，欢迎自由使用、修改与分发。
+- 本 skill 名为 **hoi4-skill-aimodding**，由**猫妖**制作，当前版本 **v2.41**，欢迎自由使用、修改与分发。
 - `references/ra-notes.md` 是特定 mod 的项目经验，仅作"如何沉淀项目经验"的示例；使用你自己的项目时可直接替换或删除。
 - 游戏根目录仅作只读参考，任何情况下不要把游戏本体文件复制进你的开源仓库。
