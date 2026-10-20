@@ -39,7 +39,7 @@
 | `TAG_lw_controllers` | country | `TAG_refresh_lw_controllers` | 决策的 `target_array` | 每次刷新重建 |
 | `lw_states`（本次争夺） | state | 宣战时快照 | 任务胜负判定、战后割州、控制权变化 | 一场战争 |
 | `lw_target_allies` | country | 宣战时（宗主国）+ 担保 on_action | `TAG_peace_out` | 一场战争 |
-| `previous_lw_targets` | country | 宣战成功后追加 | `target_trigger` 黑名单 | **永不清空** |
+| `previous_lw_targets` | country | （可选）宣战成功后追加 | 仅作历史记录，默认不参与判定 | 可选 |
 | `lw_target` | country（变量） | 宣战时 | 任务、事件、清理 | 一场战争 |
 | `global.lw_surrender_threshold` | 数值 | 任一国历史文件里设一次 | 任务取消/完成判定 | 全局共用 |
 
@@ -128,20 +128,18 @@ TAG_lw_cat = {
 		target_array = ROOT.TAG_lw_controllers
 
 		target_trigger = {
-			# ① 打过的不再打
-			NOT = {
-				is_in_array = { array = previous_lw_targets value = FROM }
-			}
-			# ② 确实在候选名单里
+			# ① 确实在候选名单里
 			is_in_array = {
 				array = ROOT.TAG_lw_controllers
 				value = FROM
 			}
-			# ③ 至少占着战区里一个州
+			# ② 至少占着战区里一个州
 			any_of_scopes = {
 				array = ROOT.TAG_lw_states
 				is_controlled_by = FROM
 			}
+			# ③ 可选：想限制「同一国家只打一次」，取消下面这行注释
+			# NOT = { is_in_array = { array = previous_lw_targets value = FROM } }
 		}
 
 		visible = {
@@ -218,7 +216,9 @@ TAG_lw_cat = {
 			}
 
 			activate_mission = TAG_lw_mission
-			add_to_array = { previous_lw_targets = FROM }
+
+			# 可选：记录历史（默认不参与判定；要「只打一次」见 target_trigger 第 ③ 条）
+			# add_to_array = { previous_lw_targets = FROM }
 		}
 	}
 }
@@ -239,7 +239,7 @@ TAG_lw_mission = {
 		}
 	}
 
-	fire_only_once = yes
+	fire_only_once = no            # 关键：设 yes 会让整套机制全局只能用一次
 	activation = { always = no }
 
 	# 取消：目标没了 / 已投降 / 投降度超过阈值
@@ -369,6 +369,22 @@ TAG_peace_out = {
 | 6 | `has_completed_focus = TAG_lw_unlock` | 解锁国策 |
 | 7 | 事件 namespace `TAG_lw_events` | 你自己的 namespace |
 | 8 | `lost_states_due_to_lw` / `pre_lw_faction_leader` 等变量名 | 换成不冲突的命名 |
+| 9 | 开战次数模式 | 默认不限；要「一国一次」见下节 |
+
+## 开战次数：默认不限，可切回「一国一次」
+
+| 模式 | `target_trigger` | `complete_effect` | mission |
+|---|---|---|---|
+| **不限次数（默认）** | 不查 `previous_lw_targets` | 不记录 | `fire_only_once = no` |
+| 一国一次 | 加 `NOT = { is_in_array = { array = previous_lw_targets value = FROM } }` | `add_to_array = { previous_lw_targets = FROM }` | `fire_only_once = yes` |
+
+三个位置必须**同进同退**：
+
+- 只加 `target_trigger` 判定、mission 仍是 `no` → 打完还能再点（判定没生效？不，是判定生效了但 `previous_lw_targets` 没记录时永远为空，于是等于没限制）。
+- 只改 mission 为 `yes`、不加判定 → 决策照常出现，但点了之后 `activate_mission` 直接失败：**战争打起来了，任务却不走**，365 天判定、谈和、割州全部失效。
+- 想「每个目标一次、但不同目标可以各打一次」→ 用「一国一次」那套即可，天然按国家区分。
+
+> 补充：即便不限次数，`target_trigger` 里的「至少占着战区一个州」仍会挡住打完之后目标已无战区州的情况——所以重复打同一国家，前提是它又拿回了战区里的州。
 
 ## 本地化 key（必须补）
 
@@ -381,7 +397,7 @@ TAG_peace_out = {
 
 1. **`target_array` 必须配 `target_root_trigger`**，否则条目会对所有国家生成。
 2. **数组元素类型必须一致**：`target_array` 里是 country，`target_trigger` 里就按 country 写；把 state 塞进 country 数组会静默失效（不报错、条目凭空消失）。
-3. **`previous_lw_targets` 不清空是有意的**——「同一国家只能被有限战争打一次」。想允许重复打，自己在清理效果里 `remove_from_array`。
+3. **默认不限次数**：不查黑名单 + mission 用 `fire_only_once = no`。要改回「一国一次」必须**同时**改两处（target_trigger 加 `previous_lw_targets` 判定 + mission 设 `fire_only_once = yes`），只改一处会出现「决策可点但任务激活不了」的假死。
 4. **`global.lw_surrender_threshold` 是全局变量**，多个国家共用；要做「每国不同阈值」必须改成国家变量，并同步改任务里的两处判定。
 5. **`lw_states` 存的是 state scope**，但 `on_state_control_changed` 里比较的是 `FROM.FROM`（州 ID）；靠引擎的 scope→id 转换对上，不要改成直接存 ID。
 6. **快照必须只收录「目标当前控制」的州**，否则战后可能把第三方或自己的州割过来。
